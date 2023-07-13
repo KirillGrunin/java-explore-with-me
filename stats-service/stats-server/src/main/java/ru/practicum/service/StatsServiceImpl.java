@@ -30,17 +30,20 @@ public class StatsServiceImpl implements StatsService {
     public List<ViewStatsDto> getCountStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         validateDate(start, end);
         if (uris.isEmpty()) {
-            if (unique)
+            if (unique) {
                 return statsRepository.getCountViewStatsWithUniqueIp(start, end);
+            }
             return statsRepository.getViewStatsCount(start, end);
         }
-        if (unique)
+        if (unique) {
             return statsRepository.getCountViewStatsFromListUriWithUniqueIp(start, end, uris);
+        }
         return statsRepository.getCountViewStatsFromListUri(start, end, uris);
     }
 
     private void validateDate(LocalDateTime start, LocalDateTime end) {
-        if (start.isAfter(end))
+        if (start.isAfter(end)) {
             throw new DateException("Дата старта должна быть раньше даты окончания");
+        }
     }
 }
