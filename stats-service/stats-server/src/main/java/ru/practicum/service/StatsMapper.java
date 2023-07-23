@@ -7,7 +7,7 @@ import ru.practicum.model.Stats;
 @UtilityClass
 public class StatsMapper {
 
-    public static Stats toStats(EndpointHitDto endpointHit) {
+    public Stats toStats(EndpointHitDto endpointHit) {
         Stats stats = new Stats();
         stats.setApp(endpointHit.getApp());
         stats.setUri(endpointHit.getUri());

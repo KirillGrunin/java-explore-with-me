@@ -13,8 +13,8 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@RestController
 @Slf4j
+@RestController
 @RequiredArgsConstructor
 public class StatsController {
 
@@ -22,16 +22,16 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveStats(@RequestBody @Valid EndpointHitDto endpointHit) {
+    public void saveStats(@Valid @RequestBody EndpointHitDto endpointHit) {
         log.debug("Информация сохранена");
         statsService.saveStats(endpointHit);
     }
 
     @GetMapping("/stats")
-    public List<ViewStatsDto> getStatsCount(@RequestParam(value = "start") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                            @RequestParam(value = "end") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                            @RequestParam(value = "uris", required = false, defaultValue = "") List<String> uris,
-                                            @RequestParam(value = "unique", required = false, defaultValue = "false") Boolean unique) {
+    public List<ViewStatsDto> getStatsCount(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+                                            @RequestParam(defaultValue = "") List<String> uris,
+                                            @RequestParam(defaultValue = "false") Boolean unique) {
         log.debug("Получена статистика для списка uri: {}", uris);
         return statsService.getCountStats(start, end, uris, unique);
     }

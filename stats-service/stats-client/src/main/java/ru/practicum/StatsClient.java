@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.ViewStatsDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class StatsClient extends BaseClient {
     private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    public StatsClient(@Value("${stats-server.url}") String url, RestTemplateBuilder restTemplateBuilder) {
+    public StatsClient(@Value("${stats-service.url}") String url, RestTemplateBuilder restTemplateBuilder) {
         super(
                 restTemplateBuilder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(url))
@@ -42,20 +42,22 @@ public class StatsClient extends BaseClient {
         log.debug("Статистика сохранена");
     }
 
-    public ResponseEntity<Object> getStatsCount(String start, String end, List<String> uris, Boolean unique) {
-        String joinUrl = String.join(",", uris);
+    public List<ViewStatsDto> getStatsCount(List<String> listUris, LocalDateTime dateStart, LocalDateTime dateEnd) {
+        final String uris = String.join(",", listUris);
+        final String start = encode(dateStart);
+        final String end = encode(dateEnd);
+        final Boolean unique = true;
         final Map<String, Object> parameters = Map.of(
-                "start", encode(start),
-                "end", encode(end),
-                "uris", joinUrl,
+                "start", start,
+                "end", end,
+                "uris", uris,
                 "unique", unique
         );
         log.debug("Получен ответ сервиса статистики");
-        return get("/?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
+        return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 
-    private String encode(String date) {
-        LocalDateTime time = LocalDateTime.parse(date, FORMAT);
-        return time.format(FORMAT);
+    private String encode(LocalDateTime date) {
+        return date.format(FORMAT);
     }
 }

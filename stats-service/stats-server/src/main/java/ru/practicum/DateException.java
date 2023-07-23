@@ -1,4 +1,4 @@
-package ru.practicum.service;
+package ru.practicum;
 
 public class DateException extends RuntimeException {
 
