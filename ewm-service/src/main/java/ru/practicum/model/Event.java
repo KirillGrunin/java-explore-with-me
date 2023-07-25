@@ -20,7 +20,7 @@ public class Event {
     private Long id;
     @Column(name = "annotation")
     private String annotation;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
     @Column(name = "confirmed_Requests")
