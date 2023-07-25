@@ -34,8 +34,9 @@ public class UserAdminController {
                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.debug("Получен список пользователей");
-        if (ids == null || ids.isEmpty())
+        if (ids == null || ids.isEmpty()) {
             return userService.getUsers(PageRequest.of(from > 0 ? from / size : 0, size));
+        }
         return userService.getUsersById(ids);
     }
 

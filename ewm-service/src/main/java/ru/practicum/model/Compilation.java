@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = "events")
 @Entity
 @Table(name = "compilations")
 public class Compilation {

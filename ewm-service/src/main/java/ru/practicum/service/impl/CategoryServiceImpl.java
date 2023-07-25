@@ -24,7 +24,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
-    @Transactional
     public CategoryDto saveCategory(NewCategoryDto newCategoryDto) {
         final Category category = categoryRepository.save(CategoryMapper.toCategory(newCategoryDto));
         return CategoryMapper.toCategoryDto(category);
@@ -40,7 +39,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public void deleteCategory(Long catId) {
         final Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Категория не найдена или недостуна"));

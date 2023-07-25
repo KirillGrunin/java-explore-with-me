@@ -20,10 +20,10 @@ public class ParticipationRequest {
     private Long id;
     @Column(name = "created")
     private LocalDateTime created;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", referencedColumnName = "id")
     private Event event;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", referencedColumnName = "id")
     private User requester;
     @Column(name = "status")

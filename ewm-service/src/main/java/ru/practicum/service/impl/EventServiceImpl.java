@@ -40,9 +40,10 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto saveEvent(Long userId, NewEventDto newEventDto) {
-        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2)))
+        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new IllegalStateException("Дата и время на которые намечено событие не может быть раньше," +
                     " чем через два часа от текущего момента");
+        }
         final User user = getUserRepository(userId);
         final Category category = chekCategory(newEventDto.getCategory());
         final Event event = toEvent(newEventDto, user, category);
@@ -55,9 +56,10 @@ public class EventServiceImpl implements EventService {
         checkUser(userId);
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
-        if (event.getState().equals(PUBLISHED) || event.getEventDate().isBefore(LocalDateTime.now().plusHours(2)))
+        if (event.getState().equals(PUBLISHED) || event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new IllegalStateException("Статус должен быть PENDING или CANCELED и дата и время на которые" +
                     " намечено событие не может быть раньше,чем через два часа от текущего момента");
+        }
         final Event eventUpdate = toEventUpdate(event, updateEventUserRequest);
         if (updateEventUserRequest.getCategory() != null) {
             final Category category = chekCategory(updateEventUserRequest.getCategory());
@@ -87,17 +89,20 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateAdminEvent(Long eventId, UpdateEventAdminRequest eventAdminRequest) {
         final Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие не найдено"));
-        if (event.getState().equals(PUBLISHED))
+        if (event.getState().equals(PUBLISHED)) {
             throw new IllegalStateException("Событие уже опубликовано");
+        }
         final Event eventUpdate = toEventAdminUpdate(event, eventAdminRequest);
         checkEventDatetime(eventUpdate.getEventDate());
         if (eventAdminRequest.getStateAction() != null) {
-            if (eventAdminRequest.getStateAction().equals(StateAction.PUBLISH_EVENT) && !event.getState().equals(PENDING))
+            if (eventAdminRequest.getStateAction().equals(StateAction.PUBLISH_EVENT) && !event.getState().equals(PENDING)) {
                 throw new IllegalStateException("Опубликовать событие можно только если оно PENDING");
+            }
             eventUpdate.setState(PUBLISHED);
             eventUpdate.setPublishedOn(LocalDateTime.now());
-            if (eventAdminRequest.getStateAction().equals(StateAction.REJECT_EVENT))
+            if (eventAdminRequest.getStateAction().equals(StateAction.REJECT_EVENT)) {
                 eventUpdate.setState(REJECT);
+            }
         }
         return toEventFullDto(eventRepository.save(eventUpdate));
     }
@@ -114,8 +119,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEvents(RequestsParamEvent requestsParam, HttpServletRequest request, String app, String sort) {
         if (requestsParam.getRangeStart() != null || requestsParam.getRangeEnd() != null)
-            if (requestsParam.getRangeEnd().isBefore(requestsParam.getRangeStart()))
+            if (requestsParam.getRangeEnd().isBefore(requestsParam.getRangeStart())) {
                 throw new NumberFormatException("Дата старта должна быть раньше даты окончания");
+            }
         statsClient.saveStats(request, app);
         final BooleanExpression conditions = createSearchConditionsForPublic(requestsParam);
         final List<EventShortDto> result = eventRepository.findAll(conditions, requestsParam.getPage())
@@ -156,8 +162,9 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkEventDatetime(LocalDateTime time) {
-        if (time.isBefore(LocalDateTime.now().plusHours(1)))
+        if (time.isBefore(LocalDateTime.now().plusHours(1))) {
             throw new IllegalStateException("Дата и время на которые намечено событие не может быть раньше,чем за час до времени публикации");
+        }
     }
 
     private String toUrl(Long id) {
@@ -171,11 +178,12 @@ public class EventServiceImpl implements EventService {
 
     private List<EventShortDto> addStats(List<EventShortDto> result, String sort, List<ViewStatsDto> stats) {
         addViews(result, stats);
-        if (sort.equals("VIEWS"))
+        if (sort.equals("VIEWS")) {
             return result
                     .stream()
                     .sorted(Comparator.comparingLong(EventShortDto::getViews))
                     .collect(Collectors.toList());
+        }
         return result;
     }
 
@@ -189,8 +197,9 @@ public class EventServiceImpl implements EventService {
     private void addViews(List<EventShortDto> result, List<ViewStatsDto> stats) {
         result
                 .forEach(e -> stats.forEach(s -> {
-                    if (toId(s.getUri()).equals(e.getId()))
+                    if (toId(s.getUri()).equals(e.getId())) {
                         e.setViews(s.getHits());
+                    }
                 }));
     }
 
@@ -202,29 +211,35 @@ public class EventServiceImpl implements EventService {
         } else {
             conditions = qEvent.initiator.id.in(requests.getUsers());
         }
-        if (requests.getCategories() != null)
+        if (requests.getCategories() != null) {
             conditions.and(qEvent.category.id.in(requests.getCategories()));
-        if (requests.getStates() != null)
+        }
+        if (requests.getStates() != null) {
             conditions.and(qEvent.state.in(requests.getStates()));
-        if (requests.getRangeStart() != null && requests.getRangeEnd() != null)
+        }
+        if (requests.getRangeStart() != null && requests.getRangeEnd() != null) {
             conditions.and(qEvent.eventDate.between(requests.getRangeStart(), requests.getRangeEnd()));
+        }
         return conditions;
     }
 
     private BooleanExpression createSearchConditionsForPublic(RequestsParamEvent requests) {
         final QEvent qEvent = QEvent.event;
         final BooleanExpression conditions = qEvent.state.eq(PUBLISHED);
-        if (requests.getOnlyAvailable())
+        if (requests.getOnlyAvailable()) {
             conditions.and(qEvent.participantLimit.ne(qEvent.confirmedRequests));
-        if (requests.getCategories() != null)
+        }
+        if (requests.getCategories() != null) {
             conditions.and(qEvent.category.id.in(requests.getCategories()));
+        }
         if (requests.getText() != null) {
             conditions.and(qEvent.annotation.containsIgnoreCase(requests.getText()));
             conditions.and(qEvent.description.containsIgnoreCase(requests.getText()));
             conditions.and(qEvent.title.containsIgnoreCase(requests.getText()));
         }
-        if (requests.getPaid() != null)
+        if (requests.getPaid() != null) {
             conditions.and(qEvent.paid.eq(requests.getPaid()));
+        }
         if (requests.getRangeStart() != null && requests.getRangeEnd() != null) {
             conditions.and(qEvent.eventDate.between(requests.getRangeStart(), requests.getRangeEnd()));
         } else {
