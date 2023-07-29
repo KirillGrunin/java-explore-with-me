@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.EndpointHitDto;
+import ru.practicum.dto.ViewStatsDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class StatsClientTwo {
 
     private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Value("${stats-server.url}")
+    @Value("${stats-service.url}")
     private String url;
 
     public void saveStats(HttpServletRequest request, String app) {
@@ -44,22 +45,24 @@ public class StatsClientTwo {
         log.debug("Ответ от stats-server: {}", response);
     }
 
-    public ResponseEntity<Object> getStatsCount(String start, String end, List<String> uris, Boolean unique) {
-        String joinUrl = String.join(",", uris);
+    public List<ViewStatsDto> getStatsCount(List<String> listUris, LocalDateTime dateStart, LocalDateTime dateEnd) {
+        final String uris = String.join(",", listUris);
+        final String start = encode(dateStart);
+        final String end = encode(dateEnd);
+        final Boolean unique = true;
         final Map<String, Object> parameters = Map.of(
-                "start", encode(start),
-                "end", encode(end),
-                "uris", joinUrl,
+                "start", start,
+                "end", end,
+                "uris", uris,
                 "unique", unique
         );
 
-        final ResponseEntity<Object> response = restTemplate.getForEntity(url + "/stats", Object.class, parameters);
+        final ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(url + "/stats?start={start}&end={end}&uris={uris}&unique={unique}", ViewStatsDto[].class, parameters);
         log.debug("Ответ от stats-server: {}", response);
-        return response;
+        return List.of(Objects.requireNonNull(response.getBody()));
     }
 
-    private String encode(String date) {
-        LocalDateTime time = LocalDateTime.parse(date, FORMAT);
-        return time.format(FORMAT);
+    private String encode(LocalDateTime date) {
+        return date.format(FORMAT);
     }
 }
