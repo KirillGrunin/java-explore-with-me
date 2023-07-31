@@ -1,1 +1,0 @@
-https://github.com/KirillGrunin/java-explore-with-me/pull/7
