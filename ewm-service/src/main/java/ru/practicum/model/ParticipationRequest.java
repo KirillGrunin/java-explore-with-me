@@ -23,7 +23,7 @@ public class ParticipationRequest {
     @ManyToOne
     @JoinColumn(name = "event_id", referencedColumnName = "id")
     private Event event;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "requester_id", referencedColumnName = "id")
     private User requester;
     @Column(name = "status")
