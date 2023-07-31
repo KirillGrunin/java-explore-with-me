@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 public class EventShortDto {
     private Long id;
     private String annotation;

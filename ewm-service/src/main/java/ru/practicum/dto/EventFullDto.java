@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class EventFullDto {
     private Long id;
     private String annotation;
