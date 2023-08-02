@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 @Table(name = "events")
+@Builder
 public class Event {
     @Id
     @Column(name = "id")
@@ -31,7 +32,7 @@ public class Event {
     private String description;
     @Column(name = "eventDate")
     private LocalDateTime eventDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", referencedColumnName = "id")
     private User initiator;
     @Column(name = "lat")

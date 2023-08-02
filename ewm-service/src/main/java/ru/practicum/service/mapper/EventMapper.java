@@ -1,11 +1,11 @@
 package ru.practicum.service.mapper;
 
+
 import lombok.experimental.UtilityClass;
 import ru.practicum.dto.*;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.User;
-import ru.practicum.util.LifeCycleState;
 import ru.practicum.util.State;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class EventMapper {
         event.setInitiator(user);
         event.setCreatedOn(LocalDateTime.now());
         event.setTitle(newEventDto.getTitle());
-        event.setState(LifeCycleState.PENDING);
+        event.setState(PENDING);
         event.setRequestModeration(newEventDto.getRequestModeration());
         event.setLat(newEventDto.getLocation().getLat());
         event.setLon(newEventDto.getLocation().getLon());
